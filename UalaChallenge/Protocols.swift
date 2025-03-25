@@ -20,3 +20,9 @@ enum DataCollectorError: Error {
     case serverError
     case decodingError
 }
+
+enum LoadingState {
+    case loading
+    case loaded
+    case error
+}

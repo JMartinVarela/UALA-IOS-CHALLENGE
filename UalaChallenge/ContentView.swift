@@ -29,6 +29,11 @@ struct ContentView: View {
                 }
             }
         }
+        .onViewDidLoad {
+            Task {
+                await viewModel.fetchCities()
+            }
+        }
     }
     
     struct CityCellView: View {

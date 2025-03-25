@@ -16,3 +16,9 @@ struct Coordinate {
     let lon: Double
     let lat: Double
 }
+
+extension City: Equatable {
+    static func == (lhs: City, rhs: City) -> Bool {
+        return lhs.id == rhs.id
+    }
+}

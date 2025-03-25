@@ -12,7 +12,7 @@ struct City {
     let coordinate: Coordinate
 }
 
-struct Coordinate {
+struct Coordinate: Decodable {
     let lon: Double
     let lat: Double
 }

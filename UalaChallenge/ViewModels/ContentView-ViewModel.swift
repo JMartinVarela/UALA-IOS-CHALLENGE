@@ -31,6 +31,18 @@ final class CitiesViewModel {
     
     var citySelected: City?
     
+    var searchText: String = ""
+    
+    var filteredCities: [City] {
+        guard !searchText.isEmpty else {
+            return cities
+        }
+        
+        return cities.filter {
+            "\($0.name), \($0.country)".lowercased().hasPrefix(searchText.lowercased())
+        }
+    }
+    
     // MARK: - Initializers
     init(dataManager: DataManager = CitiesDataManager()) {
         self.dataManager = dataManager

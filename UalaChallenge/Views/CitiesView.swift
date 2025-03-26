@@ -11,10 +11,14 @@ struct CitiesView: View {
     private let fade = AnyTransition.opacity.animation(Animation.linear(duration: 0.5))
     
     @State var viewModel: CitiesViewModel
+    
     var onCellTap: (() -> Void)?
     
     var body: some View {
         VStack(spacing: 0) {
+            SearchBarView(text: $viewModel.searchText)
+                .padding()
+            
             switch viewModel.loadingCitiesState {
             case .loading:
                 SkeletonCitiesListView(viewModel: viewModel)
@@ -61,7 +65,7 @@ struct CitiesView: View {
         var body: some View {
             ScrollView(showsIndicators: false) {
                 LazyVStack(spacing: 0) {
-                    ForEach(Array(viewModel.cities.enumerated()), id: \.offset) { index, city in
+                    ForEach(Array(viewModel.filteredCities.enumerated()), id: \.offset) { index, city in
                         Button {
                             withAnimation {
                                 viewModel.citySelected = city

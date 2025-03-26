@@ -11,6 +11,7 @@ struct CitiesView: View {
     private let fade = AnyTransition.opacity.animation(Animation.linear(duration: 0.5))
     
     @State var viewModel: CitiesViewModel
+    var onCellTap: (() -> Void)?
     
     var body: some View {
         VStack(spacing: 0) {
@@ -23,17 +24,14 @@ struct CitiesView: View {
                     EmptyCitiesView()
                         .transition(fade)
                 } else {
-                    CitiesListView(viewModel: viewModel)
+                    CitiesListView(viewModel: viewModel) {
+                        onCellTap?()
+                    }
                         .transition(fade)
                 }
             case .error:
                 ErrorView(viewModel: viewModel)
                     .transition(fade)
-            }
-        }
-        .onViewDidLoad {
-            Task {
-                await viewModel.fetchCities()
             }
         }
     }
@@ -42,13 +40,15 @@ struct CitiesView: View {
         @State var viewModel: CitiesViewModel
         
         var body: some View {
-            VStack {
-                ForEach(Array(viewModel.skeletonCities.enumerated()), id: \.offset) { index, city in
-                    CityCellView(model: city)
-                        .redacted(reason: .placeholder)
-                        .background(city == viewModel.citySelected ?
-                                Color.blue.opacity(0.5) :
-                                    (index.isMultiple(of: 2) ? Color.clear : Color.gray.opacity(0.2) ))
+            ScrollView(showsIndicators: false) {
+                VStack {
+                    ForEach(Array(viewModel.skeletonCities.enumerated()), id: \.offset) { index, city in
+                        CityCellView(model: city)
+                            .redacted(reason: .placeholder)
+                            .background(city == viewModel.citySelected ?
+                                        Color.blue.opacity(0.5) :
+                                            (index.isMultiple(of: 2) ? Color.clear : Color.gray.opacity(0.2) ))
+                    }
                 }
             }
         }
@@ -56,6 +56,7 @@ struct CitiesView: View {
     
     private struct CitiesListView: View {
         @State var viewModel: CitiesViewModel
+        var onCellTap: (() -> Void)?
         
         var body: some View {
             ScrollView(showsIndicators: false) {
@@ -65,6 +66,7 @@ struct CitiesView: View {
                             withAnimation {
                                 viewModel.citySelected = city
                             }
+                            onCellTap?()
                         } label: {
                             CityCellView(model: city)
                         }

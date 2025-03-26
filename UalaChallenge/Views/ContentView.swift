@@ -9,8 +9,38 @@ import SwiftUI
 
 struct ContentView: View {
     @State private var viewModel = CitiesViewModel()
+    @State private var path = NavigationPath()
     
     var body: some View {
-        CitiesView(viewModel: viewModel)
+        NavigationStack(path: $path) {
+            GeometryReader { geometry in
+                // Checking whether device orientation is portrait or landscape
+                if geometry.size.width > geometry.size.height {
+                    HStack(spacing: 0) {
+                        CitiesView(viewModel: viewModel)
+                            .frame(width: geometry.size.width * 0.3)
+                        
+                        MapView()
+                            .frame(width: geometry.size.width * 0.7)
+                            .toolbar(.hidden, for: .navigationBar)
+                    }
+                } else {
+                    CitiesView(viewModel: viewModel,
+                               onCellTap: {
+                        path.append("MapView")
+                    })
+                    .navigationDestination(for: String.self) { value in
+                        if value == "MapView" {
+                            MapView()
+                        }
+                    }
+                }
+            }
+        }
+        .onViewDidLoad {
+            Task {
+                await viewModel.fetchCities()
+            }
+        }
     }
 }

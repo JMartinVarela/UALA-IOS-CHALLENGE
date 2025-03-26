@@ -1,16 +1,16 @@
 //
-//  ContentView.swift
+//  CitiesView.swift
 //  UalaChallenge
 //
-//  Created by Juan Martin Varela on 24/03/2025.
+//  Created by Juan Martin Varela on 25/03/2025.
 //
 
 import SwiftUI
 
-struct ContentView: View {
+struct CitiesView: View {
     private let fade = AnyTransition.opacity.animation(Animation.linear(duration: 0.5))
     
-    @State private var viewModel = ViewModel()
+    @State var viewModel: CitiesViewModel
     
     var body: some View {
         VStack(spacing: 0) {
@@ -39,7 +39,7 @@ struct ContentView: View {
     }
     
     private struct SkeletonCitiesListView: View {
-        @State var viewModel: ViewModel
+        @State var viewModel: CitiesViewModel
         
         var body: some View {
             VStack {
@@ -55,7 +55,7 @@ struct ContentView: View {
     }
     
     private struct CitiesListView: View {
-        @State var viewModel: ViewModel
+        @State var viewModel: CitiesViewModel
         
         var body: some View {
             ScrollView(showsIndicators: false) {
@@ -102,7 +102,7 @@ struct ContentView: View {
     }
     
     private struct ErrorView: View {
-        @State var viewModel: ViewModel
+        @State var viewModel: CitiesViewModel
         
         var body: some View {
             GeometryReader { geometry in

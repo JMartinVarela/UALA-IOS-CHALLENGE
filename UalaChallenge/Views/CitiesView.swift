@@ -1,16 +1,17 @@
 //
-//  ContentView.swift
+//  CitiesView.swift
 //  UalaChallenge
 //
-//  Created by Juan Martin Varela on 24/03/2025.
+//  Created by Juan Martin Varela on 25/03/2025.
 //
 
 import SwiftUI
 
-struct ContentView: View {
+struct CitiesView: View {
     private let fade = AnyTransition.opacity.animation(Animation.linear(duration: 0.5))
     
-    @State private var viewModel = ViewModel()
+    @State var viewModel: CitiesViewModel
+    var onCellTap: (() -> Void)?
     
     var body: some View {
         VStack(spacing: 0) {
@@ -23,7 +24,9 @@ struct ContentView: View {
                     EmptyCitiesView()
                         .transition(fade)
                 } else {
-                    CitiesListView(viewModel: viewModel)
+                    CitiesListView(viewModel: viewModel) {
+                        onCellTap?()
+                    }
                         .transition(fade)
                 }
             case .error:
@@ -31,31 +34,29 @@ struct ContentView: View {
                     .transition(fade)
             }
         }
-        .onViewDidLoad {
-            Task {
-                await viewModel.fetchCities()
-            }
-        }
     }
     
     private struct SkeletonCitiesListView: View {
-        @State var viewModel: ViewModel
+        @State var viewModel: CitiesViewModel
         
         var body: some View {
-            VStack {
-                ForEach(Array(viewModel.skeletonCities.enumerated()), id: \.offset) { index, city in
-                    CityCellView(model: city)
-                        .redacted(reason: .placeholder)
-                        .background(city == viewModel.citySelected ?
-                                Color.blue.opacity(0.5) :
-                                    (index.isMultiple(of: 2) ? Color.clear : Color.gray.opacity(0.2) ))
+            ScrollView(showsIndicators: false) {
+                VStack {
+                    ForEach(Array(viewModel.skeletonCities.enumerated()), id: \.offset) { index, city in
+                        CityCellView(model: city)
+                            .redacted(reason: .placeholder)
+                            .background(city == viewModel.citySelected ?
+                                        Color.blue.opacity(0.5) :
+                                            (index.isMultiple(of: 2) ? Color.clear : Color.gray.opacity(0.2) ))
+                    }
                 }
             }
         }
     }
     
     private struct CitiesListView: View {
-        @State var viewModel: ViewModel
+        @State var viewModel: CitiesViewModel
+        var onCellTap: (() -> Void)?
         
         var body: some View {
             ScrollView(showsIndicators: false) {
@@ -65,6 +66,7 @@ struct ContentView: View {
                             withAnimation {
                                 viewModel.citySelected = city
                             }
+                            onCellTap?()
                         } label: {
                             CityCellView(model: city)
                         }
@@ -102,7 +104,7 @@ struct ContentView: View {
     }
     
     private struct ErrorView: View {
-        @State var viewModel: ViewModel
+        @State var viewModel: CitiesViewModel
         
         var body: some View {
             GeometryReader { geometry in

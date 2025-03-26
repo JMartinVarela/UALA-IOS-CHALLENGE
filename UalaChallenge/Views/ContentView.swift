@@ -20,7 +20,7 @@ struct ContentView: View {
                         CitiesView(viewModel: viewModel)
                             .frame(width: geometry.size.width * 0.3)
                         
-                        MapView()
+                        MapView(citySelected: viewModel.citySelected)
                             .frame(width: geometry.size.width * 0.7)
                             .toolbar(.hidden, for: .navigationBar)
                     }
@@ -31,7 +31,7 @@ struct ContentView: View {
                     })
                     .navigationDestination(for: String.self) { value in
                         if value == "MapView" {
-                            MapView()
+                            MapView(citySelected: viewModel.citySelected)
                         }
                     }
                 }

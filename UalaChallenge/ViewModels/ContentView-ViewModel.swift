@@ -11,11 +11,15 @@ import Observation
 @Observable
 final class CitiesViewModel {
     // MARK: - Properties
-    @ObservationIgnored private let dataManager: DataManager
+    @ObservationIgnored
+    private let dataManager: DataManager
+    @ObservationIgnored
+    private let trie = Trie()
     
     private(set) var cities: [City] = []
     private(set) var loadingCitiesState: LoadingState = .loading
     
+    @ObservationIgnored
     private(set) var skeletonCities: [City] = [
         City(country: "UA", name: "Hurzuf", id: 707860, coordinate: .init(lon: 34.283333, lat: 44.549999)),
         City(country: "RU", name: "Novinki", id: 519188, coordinate: .init(lon: 37.666668, lat: 55.683334)),
@@ -37,10 +41,7 @@ final class CitiesViewModel {
         guard !searchText.isEmpty else {
             return cities
         }
-        
-        return cities.filter {
-            "\($0.name), \($0.country)".lowercased().hasPrefix(searchText.lowercased())
-        }
+        return trie.search(withPrefix: searchText.lowercased())
     }
     
     // MARK: - Initializers
@@ -60,6 +61,11 @@ final class CitiesViewModel {
             switch response {
             case .success(let cities):
                 self.cities = cities.map { City(country: $0.country, name: $0.name, id: $0.id, coordinate: $0.coordinate) }
+                
+                self.cities.forEach {
+                    trie.insert(word: "\($0.name), \($0.country)".lowercased(), city: $0) // Preprocessing: Insert all cities into the Trie for fast searches
+                }
+                
                 citySelected = self.cities.first
                 loadingCitiesState = .loaded
             case .failure:

@@ -80,7 +80,7 @@ private extension CitiesViewModel {
     func preprocessData() {
         Task {
             cities.forEach {
-                trie.insert(word: "\($0.name), \($0.country)".lowercased(), city: $0) // Preprocessing: Insert all cities into the Trie for fast searches
+                trie.insert(word: "\($0.name), \($0.country)", city: $0) // Preprocessing: Insert all cities into the Trie for fast searches
             }
             
             await MainActor.run {

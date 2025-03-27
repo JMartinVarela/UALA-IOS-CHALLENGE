@@ -21,7 +21,10 @@ class Trie {
     /// Insert a city into the Trie
     func insert(word: String, city: City) {
         var node = root
-        for char in word {
+        // Search is case-insensitive
+        let lowercasedWord = word.lowercased()
+        
+        for char in lowercasedWord {
             if node.children[char] == nil {
                 node.children[char] = TrieNode()
             }
@@ -34,7 +37,10 @@ class Trie {
     /// Get all cities with a given prefix
     func search(withPrefix prefix: String) -> [City] {
         var node = root
-        for char in prefix {
+        // Search is case-insensitive
+        let lowercasedPrefix = prefix.lowercased()
+        
+        for char in lowercasedPrefix {
             guard let nextNode = node.children[char] else {
                 return [] // No matches found
             }

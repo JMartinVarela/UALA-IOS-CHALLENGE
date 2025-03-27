@@ -48,7 +48,7 @@ struct CitiesView: View {
             ScrollView(showsIndicators: false) {
                 VStack {
                     ForEach(Array(viewModel.skeletonCities.enumerated()), id: \.offset) { index, city in
-                        CityCellView(model: city)
+                        CityCellView(model: city, isFavorite: viewModel.isFavorite(city))
                             .redacted(reason: .placeholder)
                             .background(city == viewModel.citySelected ?
                                         Color.blue.opacity(0.5) :
@@ -73,7 +73,9 @@ struct CitiesView: View {
                             }
                             onCellTap?()
                         } label: {
-                            CityCellView(model: city)
+                            CityCellView(model: city, isFavorite: viewModel.isFavorite(city)) {
+                                viewModel.toogleFavoriteCity(city)
+                            }
                         }
                         .background(city == viewModel.citySelected ?
                                     Color.blue.opacity(0.5) :
@@ -141,21 +143,36 @@ struct CitiesView: View {
     
     private struct CityCellView: View {
         let model: City
+        let isFavorite: Bool
+        
+        var onFavoriteTap: (() -> Void)?
         
         var body: some View {
-            VStack(spacing: 5) {
-                Text("\(model.name), \(model.country)")
-                    .font(.headline)
-                    .foregroundStyle(Color.black)
-                    .frame(maxWidth: .infinity, alignment: .leading)
+            HStack {
+                VStack(spacing: 5) {
+                    Text("\(model.name), \(model.country)")
+                        .font(.headline)
+                        .foregroundStyle(Color.black)
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                    
+                    Text("lat: \(model.coordinate.lat) long: \(model.coordinate.lon)")
+                        .font(.footnote)
+                        .foregroundStyle(Color.gray.opacity(0.5))
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                }
+                .padding(.vertical, 15)
+                .padding(.leading, 8)
                 
-                Text("lat: \(model.coordinate.lat) long: \(model.coordinate.lon)")
-                    .font(.footnote)
-                    .foregroundStyle(Color.gray.opacity(0.5))
-                    .frame(maxWidth: .infinity, alignment: .leading)
+                Spacer()
+                
+                Image(systemName: isFavorite ? "star.fill" : "star")
+                    .font(.system(size: 26))
+                    .foregroundColor(.yellow)
+                    .padding(.trailing, 14)
+                    .onTapGesture {
+                        onFavoriteTap?()
+                    }
             }
-            .padding(.vertical, 15)
-            .padding(.leading, 8)
         }
     }
 }

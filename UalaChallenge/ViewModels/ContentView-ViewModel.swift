@@ -20,6 +20,9 @@ final class CitiesViewModel {
     private(set) var cities: [City] = []
     private(set) var loadingCitiesState: LoadingState = .loading
     
+    // Cities stored by id
+    var favoriteCities = Set<Int>()
+    
     @ObservationIgnored
     private(set) var skeletonCities: [City] = [
         City(country: "UA", name: "Hurzuf", id: 707860, coordinate: .init(lon: 34.283333, lat: 44.549999)),
@@ -73,6 +76,20 @@ final class CitiesViewModel {
                 loadingCitiesState = .error
             }
         }
+    }
+    
+    func isFavorite(_ city: City) -> Bool {
+        return favoriteCities.contains(city.id)
+    }
+    
+    func toogleFavoriteCity(_ city: City) {
+        if favoriteCities.contains(city.id) {
+            favoriteCities.remove(city.id)
+        } else {
+            favoriteCities.insert(city.id)
+        }
+        
+        dataManager.saveFavoriteCities(favoriteCities)
     }
 }
 

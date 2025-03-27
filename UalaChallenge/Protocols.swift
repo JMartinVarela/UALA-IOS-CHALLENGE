@@ -13,6 +13,8 @@ protocol DataCollector {
 
 protocol DataManager {
     func fetchCities() async -> Result<[CityResponse], Error>
+    func saveFavoriteCities(_ favorites: Set<Int>)
+    func loadFavoriteCities() -> Set<Int>
 }
 
 enum DataCollectorError: Error {

@@ -5,6 +5,8 @@
 //  Created by Juan Martin Varela on 25/03/2025.
 //
 
+import Foundation
+
 final class CitiesDataManager: DataManager {
     // MARK: - Properties
     private let dataCollector: DataCollector
@@ -26,5 +28,14 @@ final class CitiesDataManager: DataManager {
         } catch {
             return .failure(error)
         }
+    }
+    
+    func saveFavoriteCities(_ favorites: Set<Int>) {
+        UserDefaults.standard.set(Array(favorites), forKey: "favoriteCities")
+    }
+    
+    func loadFavoriteCities() -> Set<Int> {
+        let savedCities = UserDefaults.standard.array(forKey: "favoriteCities") as? [Int] ?? []
+        return Set(savedCities)
     }
 }

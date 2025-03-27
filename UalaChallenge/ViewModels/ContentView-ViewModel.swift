@@ -6,16 +6,21 @@
 //
 
 import Observation
+import SwiftUI
 
 
 @Observable
 final class CitiesViewModel {
     // MARK: - Properties
-    @ObservationIgnored private let dataManager: DataManager
+    @ObservationIgnored
+    private let dataManager: DataManager
+    @ObservationIgnored
+    private let trie = Trie()
     
     private(set) var cities: [City] = []
     private(set) var loadingCitiesState: LoadingState = .loading
     
+    @ObservationIgnored
     private(set) var skeletonCities: [City] = [
         City(country: "UA", name: "Hurzuf", id: 707860, coordinate: .init(lon: 34.283333, lat: 44.549999)),
         City(country: "RU", name: "Novinki", id: 519188, coordinate: .init(lon: 37.666668, lat: 55.683334)),
@@ -31,6 +36,16 @@ final class CitiesViewModel {
     
     var citySelected: City?
     
+    var searchText: String = ""
+    var showSearchBar: Bool = false
+    
+    var filteredCities: [City] {
+        guard !searchText.isEmpty else {
+            return cities
+        }
+        return trie.search(withPrefix: searchText.lowercased())
+    }
+    
     // MARK: - Initializers
     init(dataManager: DataManager = CitiesDataManager()) {
         self.dataManager = dataManager
@@ -40,6 +55,7 @@ final class CitiesViewModel {
     func fetchCities() async {
         await MainActor.run {
             loadingCitiesState = .loading
+            showSearchBar = false
         }
         
         let response = await dataManager.fetchCities()
@@ -48,10 +64,29 @@ final class CitiesViewModel {
             switch response {
             case .success(let cities):
                 self.cities = cities.map { City(country: $0.country, name: $0.name, id: $0.id, coordinate: $0.coordinate) }
+                
+                preprocessData() // prepare cities data for future searches
+                
                 citySelected = self.cities.first
                 loadingCitiesState = .loaded
             case .failure:
                 loadingCitiesState = .error
+            }
+        }
+    }
+}
+
+private extension CitiesViewModel {
+    func preprocessData() {
+        Task {
+            cities.forEach {
+                trie.insert(word: "\($0.name), \($0.country)", city: $0) // Preprocessing: Insert all cities into the Trie for fast searches
+            }
+            
+            await MainActor.run {
+                withAnimation {
+                    showSearchBar = true
+                }
             }
         }
     }

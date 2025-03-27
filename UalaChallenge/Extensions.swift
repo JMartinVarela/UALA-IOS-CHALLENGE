@@ -57,4 +57,12 @@ extension View {
     func clearButton(text: Binding<String>, showMagnifyingGlass: Bool = false) -> some View {
         modifier(ClearButton(text: text, showMagnifyingGlass: showMagnifyingGlass))
     }
+    
+    /// Hide or show the view based on a boolean value.
+    /// Allows us not build the view when isHidden = true, so we get the free space back
+    @ViewBuilder
+    public func isHidden(_ hidden: Bool) -> some View {
+        self.opacity(hidden ? 0 : 1)
+            .frame(width: hidden ? 0 : nil, height: hidden ? 0 : nil)
+    }
 }

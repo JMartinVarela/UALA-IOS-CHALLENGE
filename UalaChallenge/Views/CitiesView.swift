@@ -18,6 +18,7 @@ struct CitiesView: View {
         VStack(spacing: 0) {
             SearchBarView(text: $viewModel.searchText)
                 .padding()
+                .isHidden(!viewModel.showSearchBar)
             
             switch viewModel.loadingCitiesState {
             case .loading:

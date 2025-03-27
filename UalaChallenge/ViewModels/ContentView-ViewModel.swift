@@ -6,6 +6,7 @@
 //
 
 import Observation
+import SwiftUI
 
 
 @Observable
@@ -36,6 +37,7 @@ final class CitiesViewModel {
     var citySelected: City?
     
     var searchText: String = ""
+    var showSearchBar: Bool = false
     
     var filteredCities: [City] {
         guard !searchText.isEmpty else {
@@ -53,6 +55,7 @@ final class CitiesViewModel {
     func fetchCities() async {
         await MainActor.run {
             loadingCitiesState = .loading
+            showSearchBar = false
         }
         
         let response = await dataManager.fetchCities()
@@ -62,14 +65,28 @@ final class CitiesViewModel {
             case .success(let cities):
                 self.cities = cities.map { City(country: $0.country, name: $0.name, id: $0.id, coordinate: $0.coordinate) }
                 
-                self.cities.forEach {
-                    trie.insert(word: "\($0.name), \($0.country)".lowercased(), city: $0) // Preprocessing: Insert all cities into the Trie for fast searches
-                }
+                preprocessData() // prepare cities data for future searches
                 
                 citySelected = self.cities.first
                 loadingCitiesState = .loaded
             case .failure:
                 loadingCitiesState = .error
+            }
+        }
+    }
+}
+
+private extension CitiesViewModel {
+    func preprocessData() {
+        Task {
+            cities.forEach {
+                trie.insert(word: "\($0.name), \($0.country)".lowercased(), city: $0) // Preprocessing: Insert all cities into the Trie for fast searches
+            }
+            
+            await MainActor.run {
+                withAnimation {
+                    showSearchBar = true
+                }
             }
         }
     }

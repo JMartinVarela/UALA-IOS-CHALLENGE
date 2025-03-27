@@ -16,9 +16,17 @@ struct CitiesView: View {
     
     var body: some View {
         VStack(spacing: 0) {
-            SearchBarView(text: $viewModel.searchText)
-                .padding()
-                .isHidden(!viewModel.showSearchBar)
+            VStack(spacing: 0) {
+                SearchBarView(text: $viewModel.searchText)
+                    .padding()
+                
+                OnlyFavoritesFilterView(isChecked: $viewModel.filterOnlyFavorites)
+                    .padding(.horizontal, 15)
+                    .padding(.bottom, 10)
+                
+            }
+            .isHidden(!viewModel.showSearchBar)
+            
             
             switch viewModel.loadingCitiesState {
             case .loading:
@@ -172,6 +180,24 @@ struct CitiesView: View {
                     .onTapGesture {
                         onFavoriteTap?()
                     }
+            }
+        }
+    }
+    
+    private struct OnlyFavoritesFilterView: View {
+        @Binding var isChecked: Bool
+        
+        var body: some View {
+            HStack {
+                Image(systemName: isChecked ? "checkmark.square.fill" : "square")
+                    .foregroundColor(isChecked ? .green : .gray)
+                    .font(.system(size: 18))
+                
+                Text("Filter only favorites")
+                    .font(.system(size: 15))
+            }
+            .onTapGesture {
+                isChecked.toggle()
             }
         }
     }

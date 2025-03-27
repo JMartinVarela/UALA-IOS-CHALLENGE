@@ -30,12 +30,16 @@ final class CitiesDataManager: DataManager {
         }
     }
     
-    func saveFavoriteCities(_ favorites: Set<Int>) {
-        UserDefaults.standard.set(Array(favorites), forKey: "favoriteCities")
+    func saveFavoriteCities(_ favorites: [City]) {
+        let data = try? JSONEncoder().encode(FavoriteCities(items: favorites))
+        UserDefaults.standard.set(data, forKey: "favoriteCities")
     }
     
-    func loadFavoriteCities() -> Set<Int> {
-        let savedCities = UserDefaults.standard.array(forKey: "favoriteCities") as? [Int] ?? []
-        return Set(savedCities)
+    func loadFavoriteCities() -> [City] {
+        guard let data = UserDefaults.standard.data(forKey: "favoriteCities"),
+              let decoded = try? JSONDecoder().decode(FavoriteCities.self, from: data) else {
+            return []
+        }
+        return decoded.items
     }
 }

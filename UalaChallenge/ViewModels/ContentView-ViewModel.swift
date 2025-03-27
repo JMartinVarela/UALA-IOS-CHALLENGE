@@ -20,6 +20,11 @@ final class CitiesViewModel {
     private(set) var cities: [City] = []
     private(set) var loadingCitiesState: LoadingState = .loading
     
+    // Cities stored by id
+    var favoriteCities: [City] = []
+    
+    var filterOnlyFavorites: Bool = false
+    
     @ObservationIgnored
     private(set) var skeletonCities: [City] = [
         City(country: "UA", name: "Hurzuf", id: 707860, coordinate: .init(lon: 34.283333, lat: 44.549999)),
@@ -43,6 +48,13 @@ final class CitiesViewModel {
         guard !searchText.isEmpty else {
             return cities
         }
+        
+        if filterOnlyFavorites {
+            return favoriteCities.filter {
+                "\($0.name), \($0.country)".lowercased().hasPrefix(self.searchText.lowercased())
+            }.sorted(by: { ($0.name, $0.country) < ($1.name, $1.country) } )
+        }
+        
         return trie.search(withPrefix: searchText.lowercased())
     }
     
@@ -64,15 +76,28 @@ final class CitiesViewModel {
             switch response {
             case .success(let cities):
                 self.cities = cities.map { City(country: $0.country, name: $0.name, id: $0.id, coordinate: $0.coordinate) }
-                
                 preprocessData() // prepare cities data for future searches
-                
+                favoriteCities = dataManager.loadFavoriteCities()
                 citySelected = self.cities.first
                 loadingCitiesState = .loaded
             case .failure:
                 loadingCitiesState = .error
             }
         }
+    }
+    
+    func isFavorite(_ city: City) -> Bool {
+        return favoriteCities.contains(city)
+    }
+    
+    func toogleFavoriteCity(_ city: City) {
+        if favoriteCities.contains(city) {
+            favoriteCities.removeAll { $0 == city }
+        } else {
+            favoriteCities.append(city)
+        }
+        
+        dataManager.saveFavoriteCities(favoriteCities)
     }
 }
 
@@ -91,3 +116,5 @@ private extension CitiesViewModel {
         }
     }
 }
+
+

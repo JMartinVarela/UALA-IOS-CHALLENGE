@@ -13,6 +13,7 @@ struct CitiesView: View {
     @State var viewModel: CitiesViewModel
     
     var onCellTap: (() -> Void)?
+    var onCityInfoTap: ((City) -> Void)?
     
     var body: some View {
         VStack(spacing: 0) {
@@ -37,9 +38,11 @@ struct CitiesView: View {
                     EmptyCitiesView()
                         .transition(fade)
                 } else {
-                    CitiesListView(viewModel: viewModel) {
+                    CitiesListView(viewModel: viewModel, onCellTap: {
                         onCellTap?()
-                    }
+                    }, onCityInfoTap: { city in
+                        onCityInfoTap?(city)
+                    })
                         .transition(fade)
                 }
             case .error:
@@ -70,6 +73,7 @@ struct CitiesView: View {
     private struct CitiesListView: View {
         @State var viewModel: CitiesViewModel
         var onCellTap: (() -> Void)?
+        var onCityInfoTap: ((City) -> Void)?
         
         var body: some View {
             ScrollView(showsIndicators: false) {
@@ -81,9 +85,13 @@ struct CitiesView: View {
                             }
                             onCellTap?()
                         } label: {
-                            CityCellView(model: city, isFavorite: viewModel.isFavorite(city)) {
+                            CityCellView(model: city,
+                                         isFavorite: viewModel.isFavorite(city),
+                                         onFavoriteTap: {
                                 viewModel.toogleFavoriteCity(city)
-                            }
+                            }, onCityInfoTap: { city in
+                                onCityInfoTap?(city)
+                            })
                         }
                         .background(city == viewModel.citySelected ?
                                     Color.blue.opacity(0.5) :
@@ -154,6 +162,7 @@ struct CitiesView: View {
         let isFavorite: Bool
         
         var onFavoriteTap: (() -> Void)?
+        var onCityInfoTap: ((City) -> Void)?
         
         var body: some View {
             HStack {
@@ -163,15 +172,27 @@ struct CitiesView: View {
                         .foregroundStyle(Color.black)
                         .frame(maxWidth: .infinity, alignment: .leading)
                     
-                    Text("lat: \(model.coordinate.lat) long: \(model.coordinate.lon)")
+                    Text("lat: \(model.coordinate.lat)  long: \(model.coordinate.lon)")
                         .font(.footnote)
-                        .foregroundStyle(Color.gray.opacity(0.5))
+                        .foregroundStyle(Color.gray.opacity(0.6))
                         .frame(maxWidth: .infinity, alignment: .leading)
                 }
                 .padding(.vertical, 15)
-                .padding(.leading, 8)
+                .padding(.leading, 10)
                 
                 Spacer()
+                
+                Button {
+                    onCityInfoTap?(model)
+                } label: {
+                    Text("+ info")
+                        .font(.caption)
+                        .foregroundColor(.white)
+                        .padding(4)
+                        .padding(.horizontal, 6)
+                        .background(Color.black.opacity(0.7))
+                        .cornerRadius(16)
+                }
                 
                 Image(systemName: isFavorite ? "star.fill" : "star")
                     .font(.system(size: 26))
@@ -190,7 +211,7 @@ struct CitiesView: View {
         var body: some View {
             HStack {
                 Image(systemName: isChecked ? "checkmark.square.fill" : "square")
-                    .foregroundColor(isChecked ? .green : .gray)
+                    .foregroundColor(isChecked ? .black.opacity(0.8) : .gray)
                     .font(.system(size: 18))
                 
                 Text("Filter only favorites")

@@ -5,7 +5,7 @@
 //  Created by Juan Martin Varela on 24/03/2025.
 //
 
-struct City: Codable {
+struct City: Identifiable, Codable {
     let country: String
     let name: String
     let id: Int
